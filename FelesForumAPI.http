@@ -1,0 +1,6 @@
+@FelesForumAPI_HostAddress = http://localhost:5230
+
+GET {{FelesForumAPI_HostAddress}}/auth/
+Accept: application/json
+
+###

@@ -1,0 +1,35 @@
+﻿@page "/register"
+
+<div class="frame">
+    <p class="mb-2">Register via phone : </p>
+    <EditForm OnValidSubmit="HandleSendSmsAsync" Model="LoginPhone">
+        <DataAnnotationsValidator />
+
+        <div class="flex">
+            <img src="icons/smartphone.png" alt="phone" />
+            <span class="precall">+47</span>
+            <div>
+                <InputNumber disabled="@isButtonDisabled" @bind-Value="LoginPhone.Phone" class="form-control" />
+                <div class="text-end text-red">
+                    <ValidationMessage For="@(() => LoginPhone.Phone)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="send-sms" disabled="@isButtonDisabled">
+                Register
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    LoginPhoneDto LoginPhone = new();
+
+    bool isButtonDisabled = false;
+
+    private async Task HandleSendSmsAsync(){
+
+    }
+    }
