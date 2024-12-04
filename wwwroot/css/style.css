@@ -1,13 +1,15 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Lato&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
 
 body {
     width: 100%;
     height: 100%;
     background-color: #212A31;
-    font-family: "Roboto", sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-weight: 400;
     font-style: normal;
-    font-size:1.5rem;
+    font-size: 1.5rem;
+    background-color: #4070f4;
 }
 
 h3 {
@@ -18,9 +20,6 @@ h3 {
     margin-bottom:10px;
 }
 
-.text-red{
-    color:rgb(255, 189, 142);
-}
 
 img {
     width:28px;
@@ -28,7 +27,16 @@ img {
 }
 
 input {
-    width:100%;
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    padding: 10px;
+    border-color: #212A31;
+    outline-color: #212A31;
+}
+
+label{
+    display:block;
 }
 
     /* Remove spinner controls for all browsers */
@@ -42,43 +50,45 @@ input {
             margin: 0; /* Optional: Removes margin */
         }
 
-
 .frame {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%);
-    background-color: #748D92;
+    background-color: #fff;
     padding: 20px;
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    min-width:300px;
-}
-.buttons{
-    display:flex;
-    gap:10px;
+    min-width: 300px;
 }
 
-.buttons div{
-    flex:1;
+
+.input-with-icon{
+    display:block;
+    position:relative;
 }
 
-    .buttons div button {
-        width:100%;
-    }
-
-.flex {
-    display: flex;
-    justify-content: center;
-    align-items: start;
+.input-form {
+    display: block;
+    position: relative;
+    margin-bottom:15px;
 }
 
-.precall {
-    padding:2px 5px 2px 5px;
-    border:1px solid black;
-    border-radius:5px;
-    margin-right:5px;
+.input-has-icon{
+    padding-left:50px;
 }
+
+.input-icon {
+    padding: 1px 3px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin-right: 5px;
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+}
+
 
 .submit-btn{
     margin-top:10px;
@@ -88,16 +98,50 @@ input {
     text-align:center;
 }
 
-.text-end{
-    text-align:end;
+
+.sign-in-up-button {
+    margin-top: 10px;
+    color: rgb(0, 31, 255);
+    cursor: pointer;
+    font-size: 1.2rem;
+    float: inline-end;
+    background-color: #4070f4;
+    border:unset;
+    border-radius:5px;
+    padding:8px;
+    color:#fff;
+    font-size:1.4rem;
+    font-weight:500;
+    display:block;
+    width:100%;
+    position:relative;
 }
 
-.send-sms{
-    all:unset;
-    margin:8px;
-    color:rgb(0, 31, 255);
-    text-underline-offset:2px;
-    text-decoration:underline;
-    cursor:pointer;
-    font-size:1.2rem;
+.floating-precall{
+    position:absolute;
+    left:10px;
 }
+
+.underline {
+    text-decoration: underline;
+    text-decoration-color: #4070f4;
+    text-underline-offset: 3px; 
+}
+
+.text-validation-error {
+    float: inline-end;
+    text-align: end;
+    color:#ff0033;
+    font-size:1rem;
+}
+
+.text-small{
+    font-size:1rem;
+    margin-top:70px;
+    display:block;
+    text-align:center;
+}
+
+
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');

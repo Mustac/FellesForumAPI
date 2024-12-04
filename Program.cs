@@ -20,7 +20,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddHttpClient<CaptchaService>();
 builder.Services.AddRazorPages();          // Add Razor Pages support
 builder.Services.AddServerSideBlazor();    // Add Blazor Server support
 builder.Services.AddControllers();         // API Controllers
