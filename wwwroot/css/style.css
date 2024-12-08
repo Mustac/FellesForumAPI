@@ -31,8 +31,8 @@ input {
     height: 40px;
     border-radius: 5px;
     padding: 10px;
-    border-color: #212A31;
-    outline-color: #212A31;
+    border-color: #4070f4;
+    outline-color: #4070f4;
 }
 
 label{
@@ -100,7 +100,7 @@ label{
 
 
 .sign-in-up-button {
-    margin-top: 10px;
+    margin-top: 4px;
     color: rgb(0, 31, 255);
     cursor: pointer;
     font-size: 1.2rem;
@@ -142,6 +142,56 @@ label{
     text-align:center;
 }
 
+.token-input-form {
+    background-color: #7040f4;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.sms-notify-message {
+    font-size: 1rem;
+    background-color: #ff6633;
+    color:#fff;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:15px;
+}
+
+.countdown {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #4070f4;
+    cursor:pointer;
+    border-radius:5px;
+    border:none;
+    padding:5px;
+}
+
+    .countdown:hover {
+        background-color: #4070f4;
+        color:#fff;
+    }
+
+.flex-buttons{
+    display:flex;
+}
 
 
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+    .flex-buttons button {
+        flex: 1;
+        margin-top: 15px;
+        color: rgb(0, 31, 255);
+        cursor: pointer;
+        font-size: 1.2rem;
+        border: unset;
+        border-radius: 5px;
+        padding: 8px;
+        color: #fff;
+        font-size: 1.4rem;
+        font-weight: 500;
+        position: relative;
+    }
