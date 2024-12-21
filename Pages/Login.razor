@@ -8,14 +8,15 @@
         <h2 class="mb-2 title"><span class="underline">Phone login</span></h2>
         <EditForm OnValidSubmit="HandleSendSmsAsync" Model="LoginPhone">
             <DataAnnotationsValidator />
-
-
+            @if (!userExists)
+            {
+                <p class="text-small sms-notify-message" style="margin:0; padding:5px; text-align:left;">You don't have an account. Please click Register here located on the bottom of the form</p>
+            }
             <div>
                 <label for="phone">Phone</label>
                 <div class="input-form">
-                    @* <img src="icons/smartphone.png" alt="phone" /> *@
                     <div class="input-with-icon">
-                        <InputNumber id="phone" disabled="@isButtonDisabled" @bind-Value="LoginPhone.Phone" class="input-has-icon" />
+                        <InputNumber id="phone" disabled="@(!canSendSms)" @bind-Value="LoginPhone.Phone" class="input-has-icon" />
                         <label for="phone" class="input-icon">+47</label>
                     </div>
                     <div>
@@ -26,15 +27,19 @@
                 </div>
             </div>
 
+            @if (countdownSeconds<=0)
+            {
+                <button type="submit" class="sign-in-up-button">
+                    @buttonText
+                </button>
+            }else{
+                <button type="button" class="sign-in-up-button" disabled="true">
+                    @buttonText
+                </button>
+            }
 
+            <p class="text-small">Don't have an account? <a href="/register">Register here</a></p>
 
-
-
-            <button type="submit" class="sign-in-up-button" disabled="@isButtonDisabled">
-                @buttonText
-            </button>
-
-            <p class="text-small">Don't have an accound? <a href="/register">Register here</a></p>
 
         </EditForm>
     </div>
@@ -43,15 +48,19 @@
 @if(state == State.VerifyPhoneNumber){
     <div class="frame">
         <h2 class="mb-2 title"><span class="underline">Phone login</span></h2>
-        <EditForm OnValidSubmit="HandleSendSmsAsync" Model="LoginToken">
+        <EditForm OnValidSubmit="HandleLoginTokenAsync" Model="LoginToken">
             <DataAnnotationsValidator />
             <div>
                 <label for="phone">Phone</label>
                 <div class="input-form">
                     @* <img src="icons/smartphone.png" alt="phone" /> *@
                     <div class="input-with-icon">
-                        <button class="countdown" disabled="@true">Resend SMS</button>
-                        <InputNumber id="phone" disabled="@isButtonDisabled" @bind-Value="LoginToken.Phone" class="input-has-icon" />
+                        @if(canSendSms){
+                            <button class="countdown" disabled="@false">@SendSmsMessage</button>
+                        }else{
+                            <button class="countdown-disabled" disabled="@true">@resendButtonText</button>
+                        }
+                        <InputNumber id="phone" disabled="true" @bind-Value="LoginToken.Phone" class="input-has-icon" />
                         <label for="phone" class="input-icon">+47</label>
                     </div>
                     <div>
@@ -61,7 +70,8 @@
                     </div>
                 </div>
             </div>
-            @if(!isButtonDisabled){
+            @if (smsHasBeenSentMessage)
+            {
                 <p class="sms-notify-message">SMS has been sent to your number, please enter the token your recieved to the input below</p>
             }
             <div class="token-input-form">
@@ -97,86 +107,84 @@
 }
 
 @code {
-    private readonly int countDownTimerForSms = 5;
+    private int countDownTimerForSms { get => SmsService.ResendSmsTime; }
     private readonly string SendSmsMessage = "Send SMS";
     private readonly string ResendSmsMessage = "Resend SMS";
 
-
-
     [Inject] public SmsService SmsService { get; set; }
+    [Inject] public UserService UserService { get; set; }
     [Inject] public IJSRuntime JSRuntime { get; set; }
 
     State state = State.EnterPhoneNumber;
     private LoginPhoneDto LoginPhone = new();
     private LoginWithTokenDto LoginToken = new();
-    private string FeedbackMessage = "";
-    private string FeedbackClass = "";
     private string buttonText = "Send SMS";
     private string resendButtonText = "Resend SMS";
-    private bool isButtonDisabled = false;
+    private bool canSendSms = true;
+    private bool smsHasBeenSentMessage = false;
+    private bool userExists = true;
     private Timer timer;
 
-    private int countdownSeconds; // Cooldown duration in seconds
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (false)
+        if (firstRender)
         {
-
+            // setting up the timer
             timer = new Timer(1000);
-            timer.Elapsed += StartCooldown;
+            timer.Elapsed += TimerTick;
 
-            var clientOutcome = await SmsService.GetUsersCachedDataAsync();
+            // checking if there is cached user and if the user has sent sms recently
+            var clientOutcome = await SmsService.GetResendingTimer();
+            await JSRuntime.InvokeVoidAsync("console.log", $"{clientOutcome.IsSuccessful}");
+            await JSRuntime.InvokeVoidAsync("console.log", $"{clientOutcome.Data}");
 
-            if(clientOutcome.IsSuccessful){
 
-                await JSRuntime.InvokeVoidAsync("console.log", $"{countdownSeconds}");
-                timer.Start();
-            }
-            else{
-                countdownSeconds = countDownTimerForSms;
-                isButtonDisabled = false;
+            if(!clientOutcome.IsSuccessful)
+            {
+                countdownSeconds = clientOutcome.Data;
+                canSendSms = false;
+                StartTimer(clientOutcome.Data);
                 await InvokeAsync(StateHasChanged);
             }
-            await JSRuntime.InvokeVoidAsync("console.log", $"{isButtonDisabled}");
 
-
-
-
+            await JSRuntime.InvokeVoidAsync("console.log", $"{canSendSms}");
         }
 
     }
 
     private async Task HandleSendSmsAsync()
     {
-        try
+
+        var userResponse = await UserService.GetUserAsync(LoginPhone.Phone.Value.ToString());
+
+        if (!userResponse.IsSuccessful)
         {
+            LoginPhone.Phone = null;
+            userExists = false;
+            return;
+        }
+
+        if(countdownSeconds<=0){
             var result = await SmsService.SendSmsAsync(LoginPhone.Phone?.ToString());
 
             if(result.IsSuccessful)
             {
+                resendButtonText = $"{countDownTimerForSms}s to resend SMS";
                 state = State.VerifyPhoneNumber;
+                smsHasBeenSentMessage = true;
                 LoginToken.Phone = LoginPhone.Phone;
+                StartTimer(countDownTimerForSms);
             }
+        }
 
-            if (result.IsSuccessful)
-            {
-                FeedbackMessage = "SMS sent successfully! Please check your phone.";
-                FeedbackClass = "text-success";
-                StartTimer();
-            }
-            else
-            {
-                FeedbackMessage = result.Message;
-                FeedbackClass = "text-danger";
-            }
-        }
-        catch (Exception ex)
-        {
-            FeedbackMessage = "An error occurred while sending the SMS. Please try again later.";
-            FeedbackClass = "text-danger";
-            Console.WriteLine($"Error: {ex.Message}");
-        }
+    }
+
+    private async Task HandleLoginTokenAsync(){
+        var loginOutcome = await UserService.VerifyUserAsync(LoginToken);
+
+        await JSRuntime.InvokeVoidAsync("console.log", loginOutcome.Message);
+
     }
 
     private void ChangeStates(State state){
@@ -185,32 +193,33 @@
 
 
 
-    private async void StartCooldown(Object source, ElapsedEventArgs e)
+    private async void TimerTick(Object source, ElapsedEventArgs e)
     {
-
+        await JSRuntime.InvokeVoidAsync("console.log", $"{countdownSeconds}");
         if (countdownSeconds <= 0)
         {
             StopTimer();
         }else{
             buttonText = $"{countdownSeconds}s to resend SMS";
+            resendButtonText = $"{countdownSeconds}s to resend SMS";
             countdownSeconds--;
         }
-
         await InvokeAsync(StateHasChanged);
     }
 
 
-    private void StartTimer()
+    private int countdownSeconds = 0;
+    private void StartTimer(int secondsCooldown)
     {
-        isButtonDisabled = true;
+        countdownSeconds = secondsCooldown;
+        canSendSms = false;
         timer.Start();
     }
 
     private void StopTimer()
     {
-        countdownSeconds = countDownTimerForSms;
         buttonText = SendSmsMessage;
-        isButtonDisabled = false;
+        canSendSms = true;
         timer.Stop();
     }
 

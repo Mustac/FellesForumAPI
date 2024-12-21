@@ -12,7 +12,7 @@ namespace FellesForumAPI.Services
             _db = db;
         }
 
-        protected async Task<Outcome> NewFunctionAsync(Func<ApplicationDbContext, Task<Outcome>> func)
+        protected async Task<Outcome> InjectDatabaseFunc(Func<ApplicationDbContext, Task<Outcome>> func)
         {
             try
             {
@@ -24,7 +24,7 @@ namespace FellesForumAPI.Services
             }
         }
 
-        protected async Task<Outcome<T>> NewFunctionAsync<T>(Func<ApplicationDbContext, Task<Outcome<T>>> func)
+        protected async Task<Outcome<T>> InjectDatabaseFunc<T>(Func<ApplicationDbContext, Task<Outcome<T>>> func)
         {
             try
             {
@@ -33,6 +33,30 @@ namespace FellesForumAPI.Services
             catch (Exception ex)
             {
                 return new Outcome<T>(false, message:"Server error");
+            }
+        }
+
+        protected async Task<Outcome<T>> InjectFunc<T>(Func<Task<Outcome<T>>> func)
+        {
+            try
+            {
+                return await func();
+            }
+            catch (Exception ex)
+            {
+                return new Outcome<T>(false, message: "Server error");
+            }
+        }
+
+        protected async Task<Outcome> InjectFunc(Func<Task<Outcome>> func)
+        {
+            try
+            {
+                return await func();
+            }
+            catch (Exception ex)
+            {
+                return new Outcome(false, message: "Server error");
             }
         }
     }

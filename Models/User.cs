@@ -32,11 +32,10 @@ namespace FellesForumAPI.Models
 
         [StringLength(50)]
         public string ApartmentLetter { get; set; } = string.Empty;
+        public string LastToken { get; set; } = string.Empty;
 
         public DateTime Created { get; set; }
         public DateTime LastLogin { get; set; }
-        public string LastToken { get; set; } = string.Empty;
-
         public bool IsVerified { get; set; }
         
     }

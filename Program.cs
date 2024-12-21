@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Twilio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,11 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+string accountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
+string authToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
+
+TwilioClient.Init(accountSid, authToken);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -72,6 +78,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // For serving Blazor static files

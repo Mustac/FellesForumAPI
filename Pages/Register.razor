@@ -1,63 +1,90 @@
 ﻿@page "/register"
+@using System.Timers
 
 <div class="frame">
-    <h2 class="mb-2 title"><span class="underline">Registration</span></h2>
-    <EditForm OnValidSubmit="HandleSendSmsAsync" Model="RegisterUserModel">
-        <DataAnnotationsValidator />
+    @if(!registrationSuccess){
+        <h2 class="mb-2 title"><span class="underline">Registration</span></h2>
+        <EditForm OnValidSubmit="HandleSendSmsAsync" Model="RegisterUserModel">
+            <DataAnnotationsValidator />
 
-        <div>
-            <label for="name" style="display:block; position:relative;">Display Name</label>
-            <div class="input-form">
-                <InputText id="name" disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Name" class="form-control" />
-                <div class="text-validation-error">
-                    <ValidationMessage For="@(() => RegisterUserModel.Name)" />
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <label for="phone">Phone</label>
-            <div class="input-form">
-                @* <img src="icons/smartphone.png" alt="phone" /> *@
-                <div class="input-with-icon">
-                    <InputNumber id="phone" disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Phone" class="input-has-icon" />
-                    <label for="phone" class="input-icon">+47</label>
-                </div>
-                <div>
+            <div>
+                <label for="name" style="display:block; position:relative;">Display Name</label>
+                <div class="input-form">
+                    <InputText id="name" disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Name" class="form-control" />
                     <div class="text-validation-error">
-                        <ValidationMessage For="@(() => RegisterUserModel.Phone)" />
+                        <ValidationMessage For="@(() => RegisterUserModel.Name)" />
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="input-form">
-            <label for="name" >Email</label>
             <div>
-                <InputText disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Email" class="form-control" />
-                <div class="text-validation-error">
-                    <ValidationMessage For="@(() => RegisterUserModel.Email)" />
+                <label for="phone">Phone</label>
+                <div class="input-form">
+                    @* <img src="icons/smartphone.png" alt="phone" /> *@
+                    <div class="input-with-icon">
+                        <InputNumber id="phone" disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Phone" class="input-has-icon" />
+                        <label for="phone" class="input-icon">+47</label>
+                    </div>
+                    <div>
+                        <div class="text-validation-error">
+                            <ValidationMessage For="@(() => RegisterUserModel.Phone)" />
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
+            <div class="input-form">
+                <label for="name" >Email</label>
+                <div>
+                    <InputText disabled="@isButtonDisabled" @bind-Value="RegisterUserModel.Email" class="form-control" />
+                    <div class="text-validation-error">
+                        <ValidationMessage For="@(() => RegisterUserModel.Email)" />
+                    </div>
+                </div>
+            </div>
+
+            @if(userExists){
+                <p class="sms-notify-message" style="font-size:1.2rem;">User already exists. Click <a href="/login">Login here</a></p>
+            }
 
 
             <button type="submit" class="sign-in-up-button" disabled="@isButtonDisabled">
                 Register
             </button>
 
-        <p class="text-small">Already have an accound? <a href="/login">Login here</a></p>
+            <p class="text-small">Already have an accound? <a href="/login">Login here</a></p>
 
-    </EditForm>
+        </EditForm>
+    }
+    else if(registrationSuccess){
+        <p style="text-align:center;">The registration was a success</p>
+        <p class="text-small" style="margin-top:5px;"><a href="/login">Login here</a></p>
+
+    }
 </div>
 
 @code {
     RegisterUserDto RegisterUserModel = new();
 
+    [Inject] public UserService UserService { get; set; }
+
+    bool registrationSuccess = false;
     bool isButtonDisabled = false;
+    bool userExists = false;
 
     private async Task HandleSendSmsAsync(){
+        var userResponse = await UserService.GetUserAsync(RegisterUserModel.Phone.Value.ToString());
 
+        if(userResponse.IsSuccessful)
+        {
+            userExists = true;
+            RegisterUserModel = new();
+            return;
+        }
+            
+
+        var userCreationResponse = await UserService.CreateUserAsync(RegisterUserModel);
+        if (userCreationResponse.IsSuccessful)
+            registrationSuccess = true;
     }
     }
